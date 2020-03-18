@@ -9,22 +9,24 @@ import scala.io.StdIn
 
 object Playground extends App {
 
-  implicit val system = ActorSystem("AkkaHttpPlayground")
+  implicit val system       = ActorSystem("AkkaHttpPlayground")
   implicit val materializer = ActorMaterializer()
   import system.dispatcher
 
   val simpleRoute =
     pathEndOrSingleSlash {
-      complete(HttpEntity(
-        ContentTypes.`text/html(UTF-8)`,
-        """
+      complete(
+        HttpEntity(
+          ContentTypes.`text/html(UTF-8)`,
+          """
           |<html>
           | <body>
           |   Rock the JVM with Akka HTTP!
           | </body>
           |</html>
         """.stripMargin
-      ))
+        )
+      )
     }
 
   val bindingFuture = Http().bindAndHandle(simpleRoute, "localhost", 8080)
