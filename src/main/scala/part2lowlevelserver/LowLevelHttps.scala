@@ -36,7 +36,6 @@ object LowLevelHttps extends App {
   implicit val system       = ActorSystem("LowLevelHttps")
   implicit val materializer = ActorMaterializer()
 
-
   val requestHandler: HttpRequest => HttpResponse = {
     case HttpRequest(HttpMethods.GET, _, _, _, _) => {
       HttpResponse(
