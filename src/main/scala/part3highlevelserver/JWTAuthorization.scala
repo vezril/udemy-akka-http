@@ -5,18 +5,16 @@ import java.util.concurrent.TimeUnit
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.ActorMaterializer
 
 import scala.concurrent.duration._
 import akka.http.scaladsl.server.Directives._
-import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtSprayJson}
+import pdi.jwt.{ JwtAlgorithm, JwtClaim, JwtSprayJson }
 import spray.json._
 
-import scala.util.{Failure, Success}
-
-
+import scala.util.{ Failure, Success }
 
 object SecurityDomain extends DefaultJsonProtocol {
   case class LoginRequest(username: String, password: String)
@@ -32,16 +30,15 @@ object JWTAuthorization extends App with SprayJsonSupport {
   import system.dispatcher
 
   val superSecretPasswordDb = Map(
-    "admin" -> "admin",
+    "admin"  -> "admin",
     "daniel" -> "Rockthejvm1!"
   )
 
   val algorithm = JwtAlgorithm.HS256
   val secretKey = "rockthejvmsecret"
 
-  def checkPassword(username: String, password: String): Boolean = {
+  def checkPassword(username: String, password: String): Boolean =
     superSecretPasswordDb.contains(username) && superSecretPasswordDb(username) == password
-  }
 
   def createToken(username: String, expirationPeriodInDays: Int): String = {
     val claims = JwtClaim(
@@ -53,16 +50,14 @@ object JWTAuthorization extends App with SprayJsonSupport {
     JwtSprayJson.encode(claims, secretKey, algorithm) // JWT string
   }
 
-  def isTokenExpired(token: String): Boolean = {
+  def isTokenExpired(token: String): Boolean =
     JwtSprayJson.decode(token, secretKey, Seq(algorithm)) match {
       case Success(claims) => claims.expiration.getOrElse(0L) < System.currentTimeMillis() / 1000
-      case Failure(ex) => true
+      case Failure(ex)     => true
     }
-  }
 
-  def isTokenValid(token: String): Boolean = {
+  def isTokenValid(token: String): Boolean =
     JwtSprayJson.isValid(token, secretKey, Seq(algorithm))
-  }
 
   val loginRoute =
     post {
@@ -85,7 +80,9 @@ object JWTAuthorization extends App with SprayJsonSupport {
           } else if (isTokenExpired(token)) {
             complete("User accessed authorized endpoint")
           } else {
-            complete(HttpResponse(status = StatusCodes.Unauthorized, entity = "Token is invalid, or has been tampered with."))
+            complete(
+              HttpResponse(status = StatusCodes.Unauthorized, entity = "Token is invalid, or has been tampered with.")
+            )
           }
       }
     }
